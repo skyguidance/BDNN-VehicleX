@@ -1,0 +1,55 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Assignment 1 AutoTest
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  Test_Baseline:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -U numpy scipy pyyaml
+        pip install torch==1.8.1+cpu torchvision==0.9.1+cpu torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+
+    - name: Download Dataset
+      run: |
+        sudo -E apt install unzip wget
+        cd dataset
+        mkdir vehicle-x
+        cd vehicle-x
+        wget --no-check-certificate http://cs.anu.edu.au/~tom/datasets/vehicle-x.zip
+        unzip vehicle-x.zip
+        cd ../..
+        
+    - name: Train Baseline
+      run: |
+        python main.py -c config.yaml
+        
+    
+    - name: Upload model weights
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: checkpoint.zip
+        path: checkpoint
+        
+    - name: Upload train logs
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: main_logger.log
+        path: main_logger.log
