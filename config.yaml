@@ -1,0 +1,20 @@
+data:
+  root_dir: "dataset/vehicle-x"
+
+model:
+  input_dims: 2071
+  output_dims: 1362
+  baseline:
+    mlp_layers: [2048,2048,1532]
+    do_BN: True
+    dropout: 0.2
+
+train:
+  task: baseline
+  batch_size: 1024
+  num_workers: 1
+  optimizer: SGD
+  learning_rate: 0.1
+  momentum: 0.9
+  epochs: 100
+  save_dir: "checkpoint"
