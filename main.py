@@ -28,7 +28,7 @@ if __name__ == '__main__':
     model = model.to(device)
     optimizer = optimizer_wrapper(model, config)
     criterion = nn.CrossEntropyLoss()
-    scheduler = None
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 80, 130], gamma=0.5)
     # Train
     train_model(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler)
     # Test

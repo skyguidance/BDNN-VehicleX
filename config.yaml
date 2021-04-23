@@ -12,9 +12,9 @@ model:
 train:
   task: baseline
   batch_size: 1024
-  num_workers: 1
+  num_workers: 2
   optimizer: SGD
-  learning_rate: 0.1
+  learning_rate: 0.05
   momentum: 0.9
-  epochs: 100
+  epochs: 150
   save_dir: "checkpoint"

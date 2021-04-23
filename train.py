@@ -8,6 +8,8 @@ def train_model(config, train_dataloader, val_dataloader, device, model, optimiz
     epochs = int(config["train"]["epochs"])
     best_top1 = -1
     best_top5 = -1
+    best_epoch_top1 = -1
+    best_epoch_top5 = -1
     for epoch in range(epochs):
         config["logger"].info(f"Starting Epoch {epoch}.")
         # Train iteration.
@@ -52,15 +54,18 @@ def train_model(config, train_dataloader, val_dataloader, device, model, optimiz
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
-            pth_path = os.path.join(save_path, f"best_top1_epoch{epoch}.pth")
+            pth_path = os.path.join(save_path, "best_top1.pth")
             save_checkpoint(pth_path, model, epoch, optimizer, params=config)
             config["logger"].info("Saved Top-1 Model.{}".format(pth_path))
             best_top1 = correct_top1
+            best_epoch_top1 = epoch
         if correct_top5 > best_top5:
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
-            pth_path = os.path.join(save_path, f"best_top5_epoch{epoch}.pth")
+            pth_path = os.path.join(save_path, "best_top5.pth")
             save_checkpoint(pth_path, model, epoch, optimizer, params=config)
             config["logger"].info("Saved Top-5 Model.{}".format(pth_path))
             best_top5 = correct_top5
+            best_epoch_top5 = epoch
+        config["logger"].info("Best Top-1 Epoch: {} Best Top-5 Epoch: {}".format(best_epoch_top1, best_epoch_top5))
