@@ -31,9 +31,11 @@ jobs:
       run: |
         sudo -E apt install unzip wget
         cd dataset
+        mkdir vehicle-x
+        cd vehicle-x
         wget --no-check-certificate http://cs.anu.edu.au/~tom/datasets/vehicle-x.zip
         unzip vehicle-x.zip
-        cd ..
+        cd ../..
         
     - name: Train Baseline
       run: |
