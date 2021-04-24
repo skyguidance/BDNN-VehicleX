@@ -56,7 +56,7 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
         correct_top5 /= total
         config["logger"].info("Top-1 Acc. {} Top-5 Acc. {}".format(correct_top1, correct_top5))
         config["buffer"]["top1_acc"].append(correct_top1)
-        config["buffer"]["top1_acc"].append(correct_top5)
+        config["buffer"]["top5_acc"].append(correct_top5)
         # Save Best Model
         if correct_top1 > best_top1:
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
@@ -192,7 +192,7 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
             best_epoch_top5 = epoch
         config["logger"].info("Best Top-1 Epoch: {} Best Top-5 Epoch: {}".format(best_epoch_top1, best_epoch_top5))
         config["buffer"]["top1_acc"].append(correct_top1)
-        config["buffer"]["top1_acc"].append(correct_top5)
+        config["buffer"]["top5_acc"].append(correct_top5)
 
 
 def train_model(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
