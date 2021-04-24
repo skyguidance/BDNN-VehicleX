@@ -181,7 +181,7 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             pth_path = os.path.join(save_path, "best_top1.pth")
-            save_checkpoint(pth_path, model_F, epoch, optimizer, params=config)
+            save_checkpoint(pth_path, model_F, epoch, optimizer[0], params=config)
             config["logger"].info("Saved Top-1 Model.{}".format(pth_path))
             best_top1 = correct_top1
             best_epoch_top1 = epoch
@@ -190,7 +190,7 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             pth_path = os.path.join(save_path, "best_top5.pth")
-            save_checkpoint(pth_path, model_F, epoch, optimizer, params=config)
+            save_checkpoint(pth_path, model_F, epoch, optimizer[0], params=config)
             config["logger"].info("Saved Top-5 Model.{}".format(pth_path))
             best_top5 = correct_top5
             best_epoch_top5 = epoch
