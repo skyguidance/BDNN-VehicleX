@@ -6,7 +6,7 @@ from utils.wrapper import config_wrapper, network_wrapper, optimizer_wrapper, sc
 from utils.file_utils import dump_buffer_as_pkl
 from utils.data_utils import generate_dataloader
 from train import train_model
-from test import test_model
+from test import model_benchmark
 from utils.plot_graph import plot_graph
 
 def parse_args():
@@ -34,4 +34,4 @@ if __name__ == '__main__':
     dump_buffer_as_pkl(config)
     plot_graph(config)
     # Test
-    test_model(config, test_dataloader, device, model)
+    model_benchmark(config, test_dataloader, device, model)
