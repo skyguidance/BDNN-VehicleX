@@ -5,9 +5,9 @@ model:
   input_dims: 2071
   output_dims: 1362
   baseline:
-    mlp_layers: [2048,2048,1532]
-    do_BN: True
-    dropout: 0.2
+    mlp_layers: [4096,4096,4096]
+    do_BN: False
+    dropout: 0.0
 
 train:
   task: baseline
@@ -18,3 +18,9 @@ train:
   momentum: 0.9
   epochs: 150
   save_dir: "checkpoint"
+
+test:
+  model_dir: "checkpoint"
+  task: baseline
+  test_top_1: True
+  test_top_5: True

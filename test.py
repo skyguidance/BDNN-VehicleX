@@ -1,8 +1,12 @@
+import os
+
 import torch
 import torch.nn.functional as F
+from utils.file_utils import load_checkpoint
 
 
 def test_model(config, test_dataloader, device, model):
+    model = model.to(device)
     model.eval()
     config["logger"].info("Testing Model...")
     correct_top1 = 0
@@ -26,3 +30,19 @@ def test_model(config, test_dataloader, device, model):
     correct_top5 /= total
     config["logger"].info("============Testing Results============")
     config["logger"].info("Top-1 Acc. {} Top-5 Acc. {}".format(correct_top1, correct_top5))
+
+
+def model_benchmark(config, test_dataloader, device, model):
+    config["logger"].info("Model Testing...")
+    model = model.cpu()
+    if bool(config["test"]["test_top_1"]):
+        config["logger"].info("Loading Top-1 Model...")
+        model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top1.pth")
+        load_checkpoint(model_path, model)
+        test_model(config, test_dataloader, device, model)
+
+    if bool(config["test"]["test_top_5"]):
+        config["logger"].info("Loading Top-5 Model...")
+        model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top5.pth")
+        load_checkpoint(model_path, model)
+        test_model(config, test_dataloader, device, model)
