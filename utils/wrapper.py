@@ -2,7 +2,7 @@ import torch.optim
 import yaml
 import logging
 from network.baseline import SimpleNN
-from network.BDNN import BiDirectionalNN
+from network.BDNN import BiDirectionalNN, BiDirectionalNN_R
 
 
 def config_wrapper(config_file):
@@ -34,23 +34,63 @@ def generate_logger():
     return logger
 
 
-def network_wrapper(config):
+def network_wrapper(config, device):
     if config["train"]["task"] == "baseline":
-        return SimpleNN(mlp_layers=config["model"]["baseline"]["mlp_layers"],
-                        input_dims=config["model"]["input_dims"],
-                        output_dims=config["model"]["output_dims"],
-                        dropout_rate=config["model"]["baseline"]["dropout"],
-                        do_BN=bool(config["model"]["baseline"]["do_BN"]))
+        model = SimpleNN(mlp_layers=config["model"]["baseline"]["mlp_layers"],
+                         input_dims=config["model"]["input_dims"],
+                         output_dims=config["model"]["output_dims"],
+                         dropout_rate=config["model"]["baseline"]["dropout"],
+                         do_BN=bool(config["model"]["baseline"]["do_BN"]))
+        model = model.to(device)
+        return model
     elif config["train"]["task"] == "BDNN":
-        return None
+        model_F = BiDirectionalNN(mlp_layers=config["model"]["BDNN"]["mlp_layers"],
+                                  input_dims=config["model"]["input_dims"],
+                                  output_dims=config["model"]["output_dims"],
+                                  dropout_rate=config["model"]["BDNN"]["dropout"],
+                                  do_BN=bool(config["model"]["BDNN"]["do_BN"]))
+        model_F = model_F.to(device)
+        model_R = BiDirectionalNN_R(mlp_layers=config["model"]["BDNN"]["mlp_layers"],
+                                    input_dims=config["model"]["input_dims"],
+                                    output_dims=config["model"]["output_dims"],
+                                    dropout_rate=config["model"]["BDNN"]["dropout"],
+                                    do_BN=bool(config["model"]["BDNN"]["do_BN"]))
+        model_R = model_R.to(device)
+        return model_F, model_R
     else:
         raise NotImplementedError
 
 
 def optimizer_wrapper(model, config):
-    if config["train"]["optimizer"] == "SGD":
-        return torch.optim.SGD(model.parameters(), lr=config["train"]["learning_rate"],
-                               momentum=config["train"]["momentum"])
-    elif config["train"]["optimizer"] == "Adam":
-        return torch.optim.Adam(model.parameters(), lr=config["train"]["learning_rate"])
-    raise NotImplementedError
+    if config["train"]["task"] == "baseline":
+        if config["train"]["optimizer"] == "SGD":
+            return torch.optim.SGD(model.parameters(), lr=config["train"]["learning_rate"],
+                                   momentum=config["train"]["momentum"])
+        elif config["train"]["optimizer"] == "Adam":
+            return torch.optim.Adam(model.parameters(), lr=config["train"]["learning_rate"])
+        else:
+            raise NotImplementedError
+    elif config["train"]["task"] == "BDNN":
+        if config["train"]["optimizer"] == "SGD":
+            optim_F = torch.optim.SGD(model[0].parameters(), lr=config["train"]["learning_rate"],
+                                      momentum=config["train"]["momentum"])
+            optim_R = torch.optim.SGD(model[1].parameters(), lr=config["train"]["learning_rate"],
+                                      momentum=config["train"]["momentum"])
+            return optim_F, optim_R
+        elif config["train"]["optimizer"] == "Adam":
+            optim_F = torch.optim.Adam(model[0].parameters(), lr=config["train"]["learning_rate"])
+            optim_R = torch.optim.Adam(model[1].parameters(), lr=config["train"]["learning_rate"])
+            return optim_F, optim_R
+        else:
+            raise NotImplementedError
+
+
+def scheduler_wrapper(optimizer, config):
+    if config["train"]["task"] == "baseline":
+        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 80, 130], gamma=0.5)
+    elif config["train"]["task"] == "BDNN":
+        scheduler_F = torch.optim.lr_scheduler.MultiStepLR(optimizer[0], milestones=[30, 80, 130], gamma=0.5)
+        scheduler_R = torch.optim.lr_scheduler.MultiStepLR(optimizer[1], milestones=[30, 80, 130], gamma=0.5)
+        return scheduler_F, scheduler_R
+    else:
+        raise NotImplementedError

@@ -53,9 +53,10 @@ class VehicleXDataset(Dataset):
         types = np.zeros(11)
         types[int(sample["typeID"])] = 1
         features = np.append(features, types)
-        # Total 1362 Classes.
+        # Total 1362 Classes + 1 Extra Node (For 1to1 BDNN mapping)
         gt = int(sample["vehicleID"]) - 1
-        return torch.Tensor(features), torch.tensor(gt).long()
+        uid = int(sample["cameraID"][1:] + sample["imageName"][:-4].split("_")[-1]) / 100000
+        return torch.Tensor(features), torch.tensor(gt).long(), torch.tensor(uid).float()
 
 
 def generate_dataloader(config):

@@ -2,8 +2,8 @@ import torch
 from torch import nn
 import argparse
 
-from utils.wrapper import config_wrapper, network_wrapper, optimizer_wrapper
-from dataset.data_utils import generate_dataloader
+from utils.wrapper import config_wrapper, network_wrapper, optimizer_wrapper, scheduler_wrapper
+from utils.data_utils import generate_dataloader
 from train import train_model
 from test import test_model
 
@@ -24,11 +24,10 @@ if __name__ == '__main__':
     # Get Device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # Build Model
-    model = network_wrapper(config)
-    model = model.to(device)
+    model = network_wrapper(config, device)
     optimizer = optimizer_wrapper(model, config)
     criterion = nn.CrossEntropyLoss()
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 80, 130], gamma=0.5)
+    scheduler = scheduler_wrapper(optimizer, config)
     # Train
     train_model(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler)
     # Test

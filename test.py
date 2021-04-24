@@ -12,7 +12,7 @@ def test_model(config, test_dataloader, device, model):
     correct_top1 = 0
     correct_top5 = 0
     total = len(test_dataloader.dataset)
-    for (x, y) in test_dataloader:
+    for (x, y, extra) in test_dataloader:
         x = x.to(device)
         y = y.to(device)
         y_pred = F.softmax(model(x), dim=1)
