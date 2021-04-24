@@ -1,7 +1,15 @@
 from collections import OrderedDict
-
+import pickle
+import os
 import torch
 from torch import nn
+
+
+def dump_buffer_as_pkl(config):
+    save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
+    pkl_path = os.path.join(save_path, "config_buffer.pkl")
+    pickle.dump(config, open(pkl_path, "wb"))
+    config["logger"].info("Pickle Dumped. {}".format(pkl_path))
 
 
 def remove_redundant_keys(state_dict: OrderedDict):

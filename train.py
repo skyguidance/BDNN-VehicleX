@@ -1,9 +1,10 @@
+import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
 import os
 from utils.file_utils import save_checkpoint
-from collections import OrderedDict
+from utils.BDNN_model_utils import sync_weights
 
 
 def train_model_baseline(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
@@ -16,6 +17,7 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
         config["logger"].info(f"Starting Epoch {epoch}.")
         # Train iteration.
         model.train()
+        batch_losses = []
         for (i, (x, y, extra)) in enumerate(train_dataloader):
             x = x.to(device)
             y = y.to(device)
@@ -26,6 +28,8 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
             optimizer.step()
             config["logger"].info(
                 "Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader), loss.item()))
+            batch_losses.append(loss.item())
+        config["buffer"]["loss"].append(np.average(batch_losses))
         if scheduler:
             scheduler.step()
         # Validation
@@ -51,6 +55,8 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
         correct_top1 /= total
         correct_top5 /= total
         config["logger"].info("Top-1 Acc. {} Top-5 Acc. {}".format(correct_top1, correct_top5))
+        config["buffer"]["top1_acc"].append(correct_top1)
+        config["buffer"]["top1_acc"].append(correct_top5)
         # Save Best Model
         if correct_top1 > best_top1:
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
@@ -79,80 +85,70 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
     best_top5 = -1
     best_epoch_top1 = -1
     best_epoch_top5 = -1
+    # Change Training Direction when reach at these epochs.
+    epoch_checkpoints = config["train"]["change_direction"]
+    is_Forward = True
     for epoch in range(epochs):
-        config["logger"].info(f"Starting Epoch {epoch}.")
         # Train iteration.
         model_F, model_R = model
         model_F.train()
         model_R.train()
-        config["logger"].info("BDNN Forward ...")
-        for (i, (x, y, extra)) in enumerate(train_dataloader):
-            x = x.to(device)
-            y = y.to(device)
-            extra = extra.to(device)
-            y_pred, extra_pred = model_F(x)
-            loss_classfication = criterion(y_pred, y)
-            loss_extra = F.mse_loss(extra_pred, extra)
-            loss = loss_classfication + loss_extra
-            optimizer[0].zero_grad()
-            loss.backward()
-            optimizer[0].step()
-            config["logger"].info(
-                "[F] Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader),
-                                                                    loss.item()))
-
-        config["logger"].info("Syncing Weights ...")
-        state_dict = model_F.state_dict()
-        transformed_state_dict = OrderedDict()
-        max_mlp_layer_index = len(config["model"]["BDNN"]["mlp_layers"]) - 1
-        for k, v in state_dict.items():
-            # Copy Weights
-            if ("weight" in k) and (len(v.shape) == 2):
-                transformed_state_dict[k] = v.T
-            # Copy Bias
-            elif ("bias" in k) and (f"layer{max_mlp_layer_index}" in k):
-                transformed_state_dict[f"net.final.bias"] = v
-            elif ("bias" in k) and ("final" not in k):
-                current_layer_index = int(k.split(".")[1].replace("layer", ""))
-                transformed_state_dict[f"net.layer{current_layer_index + 1}.bias"] = v
-        model_R.load_state_dict(transformed_state_dict, strict=False)
-
-        config["logger"].info("BDNN Backward ...")
-        for (i, (x, y, extra)) in enumerate(train_dataloader):
-            x = x.to(device)
-            # y need one-hot encoding for reverse.
-            one_hot_pool = torch.eye(config["model"]["output_dims"] - 1)
-            y_one_hot = one_hot_pool[y]
-            y_combined = torch.cat((y_one_hot, extra.reshape(-1, 1)), dim=1)
-            y_combined = y_combined.to(device)
-            x_pred = model_R(y_combined)
-            loss = F.mse_loss(x_pred, x)
-            optimizer[1].zero_grad()
-            loss.backward()
-            optimizer[1].step()
-            config["logger"].info(
-                "[B] Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader),
-                                                                    loss.item()))
-        config["logger"].info("Syncing Weights ...")
-        state_dict = model_R.state_dict()
-        transformed_state_dict = OrderedDict()
-        max_mlp_layer_index = len(config["model"]["BDNN"]["mlp_layers"]) - 1
-        for k, v in state_dict.items():
-            # Copy Weights
-            if ("weight" in k) and (len(v.shape) == 2):
-                transformed_state_dict[k] = v.T
-            # Copy Bias
-            elif ("bias" in k) and ("final" in k):
-                transformed_state_dict[f"net.layer{max_mlp_layer_index}.bias"] = v
-            elif ("bias" in k) and ("layer0" not in k):
-                current_layer_index = int(k.split(".")[1].replace("layer", ""))
-                transformed_state_dict[f"net.layer{current_layer_index - 1}.bias"] = v
-        model_F.load_state_dict(transformed_state_dict, strict=False)
-
+        if epoch in epoch_checkpoints:
+            if is_Forward:
+                # Currently Forward. Change to Backward.
+                is_Forward = False
+                sync_weights(config, model_F, model_R, is_F_to_R=True)
+            else:
+                # Currently Backward. Change to Forward.
+                is_Forward = True
+                sync_weights(config, model_F, model_R, is_F_to_R=False)
+        config["logger"].info(f"Starting Epoch {epoch}.")
+        batch_losses = []
+        if is_Forward:
+            # Train Forward Loop.
+            config["logger"].info("BDNN Forward ...")
+            for (i, (x, y, extra)) in enumerate(train_dataloader):
+                x = x.to(device)
+                y = y.to(device)
+                extra = extra.to(device)
+                y_pred, extra_pred = model_F(x)
+                loss_classfication = criterion(y_pred, y)
+                # loss_extra = F.mse_loss(extra_pred, extra)
+                loss = loss_classfication  # + loss_extra
+                optimizer[0].zero_grad()
+                loss.backward()
+                optimizer[0].step()
+                config["logger"].info(
+                    "[F] Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader),
+                                                                        loss.item()))
+                batch_losses.append(loss.item())
+        else:
+            # Train Backward Loop.
+            config["logger"].info("BDNN Backward ...")
+            for (i, (x, y, extra)) in enumerate(train_dataloader):
+                x = x.to(device)
+                # y need one-hot encoding for reverse.
+                one_hot_pool = torch.eye(config["model"]["output_dims"] - 1)
+                y_one_hot = one_hot_pool[y]
+                y_combined = torch.cat((y_one_hot, extra.reshape(-1, 1)), dim=1)
+                y_combined = y_combined.to(device)
+                x_pred = model_R(y_combined)
+                loss = F.mse_loss(x_pred, x)
+                optimizer[1].zero_grad()
+                loss.backward()
+                optimizer[1].step()
+                config["logger"].info(
+                    "[B] Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader),
+                                                                        loss.item()))
+                batch_losses.append(loss.item())
+        config["buffer"]["loss"].append(np.average(batch_losses))
         if scheduler:
             scheduler[0].step()
             scheduler[1].step()
         # Validation
+        if not is_Forward:
+            # Current up-to-date weights is in model_R, syncing back.
+            sync_weights(config, model_F, model_R, is_F_to_R=False)
         model_F.eval()
         config["logger"].info("Evaluating on Validation Set...")
         correct_top1 = 0
@@ -195,6 +191,8 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
             best_top5 = correct_top5
             best_epoch_top5 = epoch
         config["logger"].info("Best Top-1 Epoch: {} Best Top-5 Epoch: {}".format(best_epoch_top1, best_epoch_top5))
+        config["buffer"]["top1_acc"].append(correct_top1)
+        config["buffer"]["top1_acc"].append(correct_top5)
 
 
 def train_model(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):

@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 class BiDirectionalNN(nn.Module):
     """
     BDNN

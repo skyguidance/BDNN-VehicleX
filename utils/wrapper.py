@@ -5,6 +5,7 @@ from network.baseline import SimpleNN
 from network.BDNN import BiDirectionalNN, BiDirectionalNN_R
 
 
+
 def config_wrapper(config_file):
     """
     Config Wrapper
@@ -16,7 +17,13 @@ def config_wrapper(config_file):
     # Add Logger
     config["logger"] = generate_logger()
     config["logger"].info("Successfully loaded YAML config.")
+    # Build Buffer to store temporal data.
+    config["buffer"] = dict()
+    config["buffer"]["loss"] = list()
+    config["buffer"]["top1_acc"] = list()
+    config["buffer"]["top5_acc"] = list()
     return config
+
 
 
 def generate_logger():

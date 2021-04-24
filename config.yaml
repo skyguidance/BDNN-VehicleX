@@ -5,14 +5,14 @@ model:
   input_dims: 2071
   output_dims: 1362
   baseline:
-    mlp_layers: [2048, 2048, 1532]
+    mlp_layers: [2048]
     do_BN: False
-    dropout: 0.0
+    dropout: 0.2
 
 train:
   task: baseline
   batch_size: 1024
-  num_workers: 2
+  num_workers: 16
   optimizer: SGD
   learning_rate: 0.1
   momentum: 0.9
