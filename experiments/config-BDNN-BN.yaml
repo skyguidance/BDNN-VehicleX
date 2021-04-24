@@ -3,24 +3,25 @@ data:
 
 model:
   input_dims: 2071
-  output_dims: 1362
-  baseline:
-    mlp_layers: [2048]
-    do_BN: False
+  output_dims: 1363
+  BDNN:
+    mlp_layers: [ 2048 ]
+    do_BN: True
     dropout: 0.2
 
 train:
-  task: baseline
+  task: BDNN
   batch_size: 1024
   num_workers: 16
   optimizer: SGD
   learning_rate: 0.1
   momentum: 0.9
-  epochs: 150
+  epochs: 600
+  change_direction: [100,200,300,400,500]
   save_dir: "checkpoint"
 
 test:
   model_dir: "checkpoint"
-  task: baseline
+  task: BDNN
   test_top_1: True
   test_top_5: True
