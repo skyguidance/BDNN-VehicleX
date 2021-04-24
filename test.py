@@ -34,13 +34,15 @@ def test_model(config, test_dataloader, device, model):
 
 def model_benchmark(config, test_dataloader, device, model):
     config["logger"].info("Model Testing...")
-    model = model.cpu()
+    if config["train"]["task"] == "baseline":
+        model = model.cpu()
+    elif config["train"]["task"] == "BDNN":
+        model = model[0].cpu()
     if bool(config["test"]["test_top_1"]):
         config["logger"].info("Loading Top-1 Model...")
         model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top1.pth")
         load_checkpoint(model_path, model)
         test_model(config, test_dataloader, device, model)
-
     if bool(config["test"]["test_top_5"]):
         config["logger"].info("Loading Top-5 Model...")
         model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top5.pth")
