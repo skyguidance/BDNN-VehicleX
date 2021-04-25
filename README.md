@@ -1,5 +1,5 @@
 # BDNN-VehicleX
-BiDirectional Neural Networks for vechicle classification
+BiDirectional Neural Networks for vehicle classification
 
 [![BDNN-VehicleX AutoTest](https://github.com/skyguidance/BDNN-VehicleX/actions/workflows/autotest.yml/badge.svg)](https://github.com/skyguidance/BDNN-VehicleX/actions/workflows/autotest.yml)
 ### One Click Approach
