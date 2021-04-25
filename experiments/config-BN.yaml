@@ -5,7 +5,7 @@ model:
   input_dims: 2071
   output_dims: 1362
   baseline:
-    mlp_layers: [2048]
+    mlp_layers: [2048, 2048, 2048]
     do_BN: True
     dropout: 0.2
 

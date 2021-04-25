@@ -8,8 +8,11 @@ def sync_weights(config, model_F, model_R, is_F_to_R):
         transformed_state_dict = OrderedDict()
         max_mlp_layer_index = len(config["model"]["BDNN"]["mlp_layers"]) - 1
         for k, v in state_dict.items():
+            # Copy BN
+            if "bn" in k:
+                transformed_state_dict[k] = v
             # Copy Weights
-            if ("weight" in k) and (len(v.shape) == 2):
+            elif ("weight" in k) and (len(v.shape) == 2):
                 transformed_state_dict[k] = v.T
             # Copy Bias
             elif ("bias" in k) and (f"layer{max_mlp_layer_index}" in k):
@@ -17,6 +20,7 @@ def sync_weights(config, model_F, model_R, is_F_to_R):
             elif ("bias" in k) and ("final" not in k):
                 current_layer_index = int(k.split(".")[1].replace("layer", ""))
                 transformed_state_dict[f"net.layer{current_layer_index + 1}.bias"] = v
+
         model_R.load_state_dict(transformed_state_dict, strict=False)
     else:
         config["logger"].info("Syncing Weights R -> F ...")
@@ -24,8 +28,11 @@ def sync_weights(config, model_F, model_R, is_F_to_R):
         transformed_state_dict = OrderedDict()
         max_mlp_layer_index = len(config["model"]["BDNN"]["mlp_layers"]) - 1
         for k, v in state_dict.items():
+            # Copy BN
+            if "bn" in k:
+                transformed_state_dict[k] = v
             # Copy Weights
-            if ("weight" in k) and (len(v.shape) == 2):
+            elif ("weight" in k) and (len(v.shape) == 2):
                 transformed_state_dict[k] = v.T
             # Copy Bias
             elif ("bias" in k) and ("final" in k):

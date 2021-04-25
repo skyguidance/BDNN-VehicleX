@@ -15,7 +15,11 @@ def test_model(config, test_dataloader, device, model):
     for (x, y, extra) in test_dataloader:
         x = x.to(device)
         y = y.to(device)
-        y_pred = F.softmax(model(x), dim=1)
+        if config["train"]["task"] == "BDNN":
+            out = model(x)[0]
+        else:
+            out = model(x)
+        y_pred = F.softmax(out, dim=1)
         y_pred = y_pred.cpu()
         y = y.cpu()
         # Calc Top-1

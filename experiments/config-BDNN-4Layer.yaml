@@ -5,8 +5,8 @@ model:
   input_dims: 2071
   output_dims: 1363
   BDNN:
-    mlp_layers: [ 2048, 2048, 2048 ]
-    do_BN: True
+    mlp_layers: [ 2048, 2048 ]
+    do_BN: False
     dropout: 0.2
 
 train:
