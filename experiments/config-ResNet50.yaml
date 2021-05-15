@@ -1,0 +1,29 @@
+data:
+  root_dir: "dataset/vehicle-x-v2"
+  is_v2: True
+
+
+model:
+  backbone:
+    net: resnet50
+    pretrained: True
+  output_dims: 1362
+
+train:
+  task: CNN
+  batch_size: 128
+  num_workers: 0
+  optimizer: SGD
+  learning_rate: 0.01
+  momentum: 0.9
+  epochs: 200
+  save_dir: "checkpoint"
+
+test:
+  model_dir: "checkpoint"
+  task: CNN
+  test_top_1: True
+  test_top_5: True
+  CNN_additional:
+    net: resnet50
+    dump_numpy_feature: True

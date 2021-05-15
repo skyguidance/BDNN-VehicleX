@@ -13,7 +13,10 @@ def test_model(config, test_dataloader, device, model):
     correct_top5 = 0
     total = len(test_dataloader.dataset)
     for (x, y, extra) in test_dataloader:
-        x = x.to(device)
+        if config["test"]["task"] == "CNN":
+            x = x["image"].to(device)
+        else:
+            x = x.to(device)
         y = y.to(device)
         if config["train"]["task"] == "BDNN":
             out = model(x)[0]
@@ -44,11 +47,19 @@ def model_benchmark(config, test_dataloader, device, model):
         model = model[0].cpu()
     if bool(config["test"]["test_top_1"]):
         config["logger"].info("Loading Top-1 Model...")
-        model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top1.pth")
+        if config["test"]["task"] == "CNN":
+            model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"],
+                                      config["test"]["CNN_additional"]["net"], "best_top1.pth")
+        else:
+            model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top1.pth")
         load_checkpoint(model_path, model)
         test_model(config, test_dataloader, device, model)
     if bool(config["test"]["test_top_5"]):
         config["logger"].info("Loading Top-5 Model...")
-        model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top5.pth")
+        if config["test"]["task"] == "CNN":
+            model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"],
+                                      config["test"]["CNN_additional"]["net"], "best_top5.pth")
+        else:
+            model_path = os.path.join(config["test"]["model_dir"], config["test"]["task"], "best_top5.pth")
         load_checkpoint(model_path, model)
         test_model(config, test_dataloader, device, model)

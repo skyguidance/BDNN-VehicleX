@@ -1,0 +1,47 @@
+# This workflow is for Project BDNN-VehicleX
+# It will Automatically Train all the tasks when the code changes/update.
+# This workflow is based on the original Github Actions Sample.
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: BDNN-VehicleX-V2 CNN AutoTest
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  ResNet50:
+    timeout-minutes: 600
+    runs-on: self-hosted,GPU
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download Dataset
+      run: |
+        cd dataset
+        mkdir vehicle-x-v2
+        cd vehicle-x-v2
+        wget --no-check-certificate http://cs.anu.edu.au/~tom/datasets/vehicle-x_v2.zip
+        unzip vehicle-x2.zip
+        cd ../..
+
+    - name: Train
+      run: |
+        python main.py -c experiments/config-ResNet50.yaml
+
+
+    - name: Upload data
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: checkpoint-ResNet50.zip
+        path: checkpoint
+
+    - name: Upload train logs
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: main_logger-ResNet50.zip
+        path: main_logger.log

@@ -8,9 +8,11 @@ from utils.data_utils import generate_dataloader
 from train import train_model
 from test import model_benchmark
 from utils.plot_graph import plot_graph
+from utils.CNN_utils import generate_numpy_featues
+
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="COMP8420-NNDL Assignment 1")
+    parser = argparse.ArgumentParser(description="Vehicle-X CNN and BDNN Classification")
     parser.add_argument('--config', '-c', required=True, type=str,
                         help='The YAML config filepath.')
     args = parser.parse_args()
@@ -35,3 +37,8 @@ if __name__ == '__main__':
     plot_graph(config)
     # Test
     model_benchmark(config, test_dataloader, device, model)
+    # Additional Tasks for CNN
+    if "CNN_additional" in config["test"].keys():
+        # This is CNN. May have special tasks.
+        if config["test"]["CNN_additional"]["dump_numpy_feature"]:
+            generate_numpy_featues(config, device, model)

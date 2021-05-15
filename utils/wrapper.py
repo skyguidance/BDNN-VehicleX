@@ -3,7 +3,7 @@ import yaml
 import logging
 from network.baseline import SimpleNN
 from network.BDNN import BiDirectionalNN, BiDirectionalNN_R
-
+from network.CNN import CNN
 
 
 def config_wrapper(config_file):
@@ -23,7 +23,6 @@ def config_wrapper(config_file):
     config["buffer"]["top1_acc"] = list()
     config["buffer"]["top5_acc"] = list()
     return config
-
 
 
 def generate_logger():
@@ -64,12 +63,15 @@ def network_wrapper(config, device):
                                     do_BN=bool(config["model"]["BDNN"]["do_BN"]))
         model_R = model_R.to(device)
         return model_F, model_R
+    elif config["train"]["task"] == "CNN":
+        model = CNN(config)
+        return model
     else:
         raise NotImplementedError
 
 
 def optimizer_wrapper(model, config):
-    if config["train"]["task"] == "baseline":
+    if config["train"]["task"] == "baseline" or config["train"]["task"] == "CNN":
         if config["train"]["optimizer"] == "SGD":
             return torch.optim.SGD(model.parameters(), lr=config["train"]["learning_rate"],
                                    momentum=config["train"]["momentum"])
@@ -99,5 +101,7 @@ def scheduler_wrapper(optimizer, config):
         scheduler_F = torch.optim.lr_scheduler.MultiStepLR(optimizer[0], milestones=[30, 80, 130], gamma=0.5)
         scheduler_R = torch.optim.lr_scheduler.MultiStepLR(optimizer[1], milestones=[30, 80, 130], gamma=0.5)
         return scheduler_F, scheduler_R
+    elif config["train"]["task"] == "CNN":
+        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90], gamma=0.5)
     else:
         raise NotImplementedError
