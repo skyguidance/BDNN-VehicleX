@@ -12,7 +12,7 @@ model:
 train:
   task: CNN
   batch_size: 64
-  num_workers: 0
+  num_workers: 8
   optimizer: SGD
   learning_rate: 0.01
   momentum: 0.9
