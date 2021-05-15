@@ -15,7 +15,7 @@ on:
 jobs:
   ResNet50:
     timeout-minutes: 600
-    runs-on: self-hosted,GPU
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
         cd dataset
         mkdir vehicle-x-v2
         cd vehicle-x-v2
-        wget --no-check-certificate http://cs.anu.edu.au/~tom/datasets/vehicle-x_v2.zip
+        mv ~/Downloads/vehicle-x2.zip .
         unzip vehicle-x2.zip
         cd ../..
 
