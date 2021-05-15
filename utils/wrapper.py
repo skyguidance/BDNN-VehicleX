@@ -65,6 +65,7 @@ def network_wrapper(config, device):
         return model_F, model_R
     elif config["train"]["task"] == "CNN":
         model = CNN(config)
+        model = model.to(device)
         return model
     else:
         raise NotImplementedError
