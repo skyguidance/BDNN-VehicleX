@@ -209,6 +209,7 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
         for (i, (feature, y, extra)) in enumerate(train_dataloader):
             image = feature["image"]
             image = image.to(device)
+            y = y.to(device)
             y_pred = model(image)
             loss = criterion(y_pred, y)
             optimizer.zero_grad()
