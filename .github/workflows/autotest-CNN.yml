@@ -22,7 +22,7 @@ jobs:
         cd dataset
         mkdir vehicle-x-v2
         cd vehicle-x-v2
-        mv ~/Downloads/vehicle-x_v2.zip .
+        cp ~/Downloads/vehicle-x_v2.zip .
         unzip vehicle-x_v2.zip
         cd ../..
 
