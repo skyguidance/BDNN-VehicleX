@@ -228,9 +228,9 @@ def generate_dataloader(config):
         train_dataloader = DataLoader(train_dataset, batch_size=config["train"]["batch_size"], shuffle=True,
                                       drop_last=True,
                                       pin_memory=True, num_workers=config["train"]["num_workers"])
-        val_dataloader = DataLoader(val_dataset, batch_size=config["train"]["batch_size"],
+        val_dataloader = DataLoader(val_dataset, batch_size=1,
                                     num_workers=config["train"]["num_workers"])
-        test_dataloader = DataLoader(test_dataset, batch_size=config["train"]["batch_size"],
+        test_dataloader = DataLoader(test_dataset, batch_size=1,
                                      num_workers=config["train"]["num_workers"])
 
     return (train_dataloader, val_dataloader, test_dataloader)
