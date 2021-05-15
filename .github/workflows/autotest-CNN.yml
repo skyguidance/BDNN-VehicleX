@@ -8,9 +8,6 @@ name: BDNN-VehicleX-V2 CNN AutoTest
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
 
 jobs:
   ResNet50:
@@ -25,8 +22,8 @@ jobs:
         cd dataset
         mkdir vehicle-x-v2
         cd vehicle-x-v2
-        mv ~/Downloads/vehicle-x2.zip .
-        unzip vehicle-x2.zip
+        mv ~/Downloads/vehicle-x_v2.zip .
+        unzip vehicle-x_v2.zip
         cd ../..
 
     - name: Train
