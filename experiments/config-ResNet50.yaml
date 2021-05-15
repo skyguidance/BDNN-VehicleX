@@ -16,7 +16,7 @@ train:
   optimizer: SGD
   learning_rate: 0.01
   momentum: 0.9
-  epochs: 200
+  epochs: 60
   save_dir: "checkpoint"
 
 test:
