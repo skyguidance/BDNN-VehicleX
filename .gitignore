@@ -1,6 +1,7 @@
 /.idea/
-/dataset/vehicle-x/
-/dataset/vehicle-x.zip
+/dataset/*
 /document/
 /Submission/
 *.log
+/checkpoint/*
+

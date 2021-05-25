@@ -5,8 +5,8 @@ data:
 
 model:
   backbone:
-    net: resnet50
-    pretrained: True
+    net: vgg16
+    pretrained: False
   output_dims: 1362
 
 train:
@@ -25,5 +25,5 @@ test:
   test_top_1: True
   test_top_5: True
   CNN_additional:
-    net: resnet50
+    net: vgg16
     dump_numpy_feature: True

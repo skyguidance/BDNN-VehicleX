@@ -103,6 +103,6 @@ def scheduler_wrapper(optimizer, config):
         scheduler_R = torch.optim.lr_scheduler.MultiStepLR(optimizer[1], milestones=[30, 80, 130], gamma=0.5)
         return scheduler_F, scheduler_R
     elif config["train"]["task"] == "CNN":
-        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90], gamma=0.5)
+        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20,30,40], gamma=0.5)
     else:
         raise NotImplementedError

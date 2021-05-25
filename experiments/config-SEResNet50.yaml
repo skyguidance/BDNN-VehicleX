@@ -5,7 +5,7 @@ data:
 
 model:
   backbone:
-    net: resnet50
+    net: seresnet50
     pretrained: True
   output_dims: 1362
 
@@ -25,5 +25,5 @@ test:
   test_top_1: True
   test_top_5: True
   CNN_additional:
-    net: resnet50
+    net: seresnet50
     dump_numpy_feature: True

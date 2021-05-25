@@ -22,8 +22,9 @@ def generate_numpy_featues(config, device, model):
     load_checkpoint(model_path, model)
     model.eval()
     config["logger"].info("Generate Train Features...")
-    for (i, x, y, extra, path) in tqdm(enumerate(train_dataloader)):
+    for (i, (x, y, extra, path)) in tqdm(enumerate(train_dataloader)):
         x = x["image"].to(device)
+        path = path[0]
         model = model.to(device)
         x = model.forward_backbone(x)
         x = x.cpu().detach().numpy()[0]
@@ -34,8 +35,9 @@ def generate_numpy_featues(config, device, model):
         save_path = os.path.join(save_folder, path.replace(".jpg", ".npy"))
         np.save(save_path, x)
     config["logger"].info("Generate Val Features...")
-    for (i, x, y, extra, path) in tqdm(enumerate(val_dataloader)):
+    for (i, (x, y, extra, path)) in tqdm(enumerate(val_dataloader)):
         x = x["image"].to(device)
+        path = path[0]
         model = model.to(device)
         x = model.forward_backbone(x)
         x = x.cpu().detach().numpy()[0]
@@ -46,8 +48,9 @@ def generate_numpy_featues(config, device, model):
         save_path = os.path.join(save_folder, path.replace(".jpg", ".npy"))
         np.save(save_path, x)
     config["logger"].info("Generate Test Features...")
-    for (i, x, y, extra, path) in tqdm(enumerate(train_dataloader)):
+    for (i, (x, y, extra, path)) in tqdm(enumerate(train_dataloader)):
         x = x["image"].to(device)
+        path = path[0]
         model = model.to(device)
         x = model.forward_backbone(x)
         x = x.cpu().detach().numpy()[0]
