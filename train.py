@@ -221,6 +221,11 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
         config["buffer"]["loss"].append(np.average(batch_losses))
         if scheduler:
             scheduler.step()
+        # Free GPU Mem
+        if str(device) != "cpu":
+            del image
+            del y
+            torch.cuda.empty_cache()
         # Validation
         model.eval()
         config["logger"].info("Evaluating on Validation Set...")
@@ -268,6 +273,11 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
             best_top5 = correct_top5
             best_epoch_top5 = epoch
         config["logger"].info("Best Top-1 Epoch: {} Best Top-5 Epoch: {}".format(best_epoch_top1, best_epoch_top5))
+        # Free GPU Mem
+        if str(device) != "cpu":
+            del image
+            del y
+            torch.cuda.empty_cache()
 
 
 def train_model(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
