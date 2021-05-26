@@ -275,7 +275,7 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
         config["logger"].info("Best Top-1 Epoch: {} Best Top-5 Epoch: {}".format(best_epoch_top1, best_epoch_top5))
         # Free GPU Mem
         if str(device) != "cpu":
-            del image
+            del x
             del y
             torch.cuda.empty_cache()
 
