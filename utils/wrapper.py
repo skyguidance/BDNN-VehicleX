@@ -1,6 +1,7 @@
 import torch.optim
 import yaml
 import logging
+import os
 from network.baseline import SimpleNN
 from network.BDNN import BiDirectionalNN, BiDirectionalNN_R
 from network.CNN import CNN
@@ -15,7 +16,10 @@ def config_wrapper(config_file):
     """
     config = yaml.safe_load(open(config_file))
     # Add Logger
-    config["logger"] = generate_logger()
+    if config["train"]["task"] == "CNN":
+        config["logger"] = generate_logger(name=config["model"]["backbone"]["net"])
+    else:
+        config["logger"] = generate_logger()
     config["logger"].info("Successfully loaded YAML config.")
     # Build Buffer to store temporal data.
     config["buffer"] = dict()
@@ -25,10 +29,14 @@ def config_wrapper(config_file):
     return config
 
 
-def generate_logger():
+def generate_logger(name=None):
     logger = logging.getLogger("main Logger")
     logger.setLevel(level=logging.INFO)
-    handler = logging.FileHandler("main_logger.log")
+    if name:
+        name = str(name)
+        handler = logging.FileHandler("main_logger_{}.log".format(name))
+    else:
+        handler = logging.FileHandler("main_logger.log")
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
@@ -103,6 +111,6 @@ def scheduler_wrapper(optimizer, config):
         scheduler_R = torch.optim.lr_scheduler.MultiStepLR(optimizer[1], milestones=[30, 80, 130], gamma=0.5)
         return scheduler_F, scheduler_R
     elif config["train"]["task"] == "CNN":
-        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20,30,40], gamma=0.5)
+        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[20, 30, 40], gamma=0.5)
     else:
         raise NotImplementedError
