@@ -16,13 +16,13 @@ class CNN(nn.Module):
 
     def forward(self, x):
         x = self.forward_backbone(x)
-        # Needs GAP.
-        if len(x.shape) == 4 and x.shape[3] != 1:
-            x = self.gap(x)
-        x = x.flatten(1)
         x = self.fc(x)
         return x
 
     def forward_backbone(self, x):
         x = self.backbone(x)
+        # Needs GAP.
+        if len(x.shape) == 4 and x.shape[3] != 1:
+            x = self.gap(x)
+        x = x.flatten(1)
         return x
