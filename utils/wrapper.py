@@ -72,7 +72,10 @@ def network_wrapper(config, device):
         model_R = model_R.to(device)
         return model_F, model_R
     elif config["train"]["task"] == "CNN":
-        model = CNN(config)
+        if "cos_loss" in config["train"].keys() and config["train"]["cos_loss"] in ["arcface", "cosface"]:
+            model = CNN(config, loss_module=config["train"]["cos_loss"])
+        else:
+            model = CNN(config)
         model = model.to(device)
         return model
     else:

@@ -210,7 +210,10 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
             image = feature["image"]
             image = image.to(device)
             y = y.to(device)
-            y_pred = model(image)
+            if "cos_loss" in config["train"].keys() and config["train"]["cos_loss"]:
+                y_pred = model(image, y, device=device)
+            else:
+                y_pred = model(image)
             loss = criterion(y_pred, y)
             optimizer.zero_grad()
             loss.backward()
