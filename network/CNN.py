@@ -29,7 +29,7 @@ class CNN(nn.Module):
         if self.loss_module == "softmax":
             x = self.fc(x)
         elif self.loss_module in ["arcface", "cosface"]:
-            x = self.fc(x, label)
+            x = self.fc(x, label, device=device)
         else:
             raise NotImplementedError
         return x
