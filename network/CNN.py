@@ -25,6 +25,7 @@ class CNN(nn.Module):
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
 
     def forward(self, x, label=None, device="cpu"):
+        """Forward backbone and final FC."""
         x = self.forward_backbone(x)
         if self.loss_module == "softmax":
             x = self.fc(x)
@@ -35,6 +36,7 @@ class CNN(nn.Module):
         return x
 
     def forward_backbone(self, x):
+        """Forward backbone only."""
         x = self.backbone(x)
         # Needs GAP.
         if len(x.shape) == 4 and x.shape[3] != 1:

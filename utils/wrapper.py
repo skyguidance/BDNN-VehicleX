@@ -30,6 +30,7 @@ def config_wrapper(config_file):
 
 
 def generate_logger(name=None):
+    """Generate log file."""
     logger = logging.getLogger("main Logger")
     logger.setLevel(level=logging.INFO)
     if name:
@@ -49,6 +50,7 @@ def generate_logger(name=None):
 
 
 def network_wrapper(config, device):
+    """Wrapper for Network. Generate network based on config"""
     if config["train"]["task"] == "baseline":
         model = SimpleNN(mlp_layers=config["model"]["baseline"]["mlp_layers"],
                          input_dims=config["model"]["input_dims"],
@@ -83,6 +85,7 @@ def network_wrapper(config, device):
 
 
 def optimizer_wrapper(model, config):
+    """Optimizer wrapper. Genreate optimizer based on config"""
     if config["train"]["task"] == "baseline" or config["train"]["task"] == "CNN":
         if config["train"]["optimizer"] == "SGD":
             return torch.optim.SGD(model.parameters(), lr=config["train"]["learning_rate"],
@@ -107,6 +110,7 @@ def optimizer_wrapper(model, config):
 
 
 def scheduler_wrapper(optimizer, config):
+    """Generate Scheduler."""
     if config["train"]["task"] == "baseline":
         return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 80, 130], gamma=0.5)
     elif config["train"]["task"] == "BDNN":

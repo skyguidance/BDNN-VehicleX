@@ -21,6 +21,7 @@ def generate_numpy_featues(config, device, model):
                               config["test"]["CNN_additional"]["net"], "best_top1.pth")
     load_checkpoint(model_path, model)
     model.eval()
+    # Genreate Train features
     config["logger"].info("Generate Train Features...")
     for (i, (x, y, extra, path)) in tqdm(enumerate(train_dataloader)):
         x = x["image"].to(device)
@@ -34,6 +35,7 @@ def generate_numpy_featues(config, device, model):
             os.makedirs(save_folder)
         save_path = os.path.join(save_folder, path.replace(".jpg", ".npy"))
         np.save(save_path, x)
+    # Genreate Validation Features
     config["logger"].info("Generate Val Features...")
     for (i, (x, y, extra, path)) in tqdm(enumerate(val_dataloader)):
         x = x["image"].to(device)
@@ -47,6 +49,7 @@ def generate_numpy_featues(config, device, model):
             os.makedirs(save_folder)
         save_path = os.path.join(save_folder, path.replace(".jpg", ".npy"))
         np.save(save_path, x)
+    # Generate Test Features
     config["logger"].info("Generate Test Features...")
     for (i, (x, y, extra, path)) in tqdm(enumerate(train_dataloader)):
         x = x["image"].to(device)

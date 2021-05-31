@@ -2,6 +2,13 @@ from collections import OrderedDict
 
 
 def sync_weights(config, model_F, model_R, is_F_to_R):
+    """
+    BDNN model weights sync
+    :param config: config
+    :param model_F: Stage-F forward model
+    :param model_R: Stage-R backward model
+    :param is_F_to_R: True if sync model weights from F to R. False if R to F.
+    """
     if is_F_to_R:
         config["logger"].info("Syncing Weights F -> R ...")
         state_dict = model_F.state_dict()

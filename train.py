@@ -8,11 +8,23 @@ from utils.BDNN_model_utils import sync_weights
 
 
 def train_model_baseline(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
+    """
+    Baseline Model trainer
+    :param config: config file
+    :param train_dataloader: training dataloader
+    :param val_dataloader: validation dataloader
+    :param device: training device
+    :param model: model
+    :param optimizer: optimizer
+    :param criterion: loss function
+    :param scheduler: training scheduler
+    """
     epochs = int(config["train"]["epochs"])
     best_top1 = -1
     best_top5 = -1
     best_epoch_top1 = -1
     best_epoch_top5 = -1
+    # Loop the training iteration
     for epoch in range(epochs):
         config["logger"].info(f"Starting Epoch {epoch}.")
         # Train iteration.
@@ -30,6 +42,7 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
                 "Epoch: {}/{} Iteration: {}/{} Loss: {}".format(epoch, epochs, i, len(train_dataloader), loss.item()))
             batch_losses.append(loss.item())
         config["buffer"]["loss"].append(np.average(batch_losses))
+        # Scheduler Step
         if scheduler:
             scheduler.step()
         # Validation
@@ -58,6 +71,7 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
         config["buffer"]["top1_acc"].append(correct_top1)
         config["buffer"]["top5_acc"].append(correct_top5)
         # Save Best Model
+        # Save Top-1
         if correct_top1 > best_top1:
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
             if not os.path.exists(save_path):
@@ -67,6 +81,7 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
             config["logger"].info("Saved Top-1 Model.{}".format(pth_path))
             best_top1 = correct_top1
             best_epoch_top1 = epoch
+        # Save Top-5
         if correct_top5 > best_top5:
             save_path = os.path.join(config["train"]["save_dir"], config["train"]["task"])
             if not os.path.exists(save_path):
@@ -80,6 +95,17 @@ def train_model_baseline(config, train_dataloader, val_dataloader, device, model
 
 
 def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
+    """
+    BDNN Model trainer
+    :param config: config file
+    :param train_dataloader: training dataloader
+    :param val_dataloader: validation dataloader
+    :param device: training device
+    :param model: model
+    :param optimizer: optimizer
+    :param criterion: loss function
+    :param scheduler: training scheduler
+    """
     epochs = int(config["train"]["epochs"])
     best_top1 = -1
     best_top5 = -1
@@ -142,6 +168,7 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
                                                                         loss.item()))
                 batch_losses.append(loss.item())
         config["buffer"]["loss"].append(np.average(batch_losses))
+        # Model scheduler step forward
         if scheduler:
             scheduler[0].step()
             scheduler[1].step()
@@ -196,11 +223,23 @@ def train_model_BDNN(config, train_dataloader, val_dataloader, device, model, op
 
 
 def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, model, optimizer, criterion, scheduler):
+    """
+    CNN Model trainer
+    :param config: config file
+    :param train_dataloader: training dataloader
+    :param val_dataloader: validation dataloader
+    :param device: training device
+    :param model: model
+    :param optimizer: optimizer
+    :param criterion: loss function
+    :param scheduler: training scheduler
+    """
     epochs = int(config["train"]["epochs"])
     best_top1 = -1
     best_top5 = -1
     best_epoch_top1 = -1
     best_epoch_top5 = -1
+    # Iteration training loop
     for epoch in range(epochs):
         config["logger"].info(f"Starting Epoch {epoch}.")
         model.train()
@@ -210,8 +249,10 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
             image = feature["image"]
             image = image.to(device)
             y = y.to(device)
+            # If Arcface or Cosface, label is needed for forward()
             if "cos_loss" in config["train"].keys() and config["train"]["cos_loss"]:
                 y_pred = model(image, y, device=device)
+            # Else only input image is required
             else:
                 y_pred = model(image)
             loss = criterion(y_pred, y)
@@ -224,7 +265,7 @@ def train_model_CNN_baseline(config, train_dataloader, val_dataloader, device, m
         config["buffer"]["loss"].append(np.average(batch_losses))
         if scheduler:
             scheduler.step()
-        # Free GPU Mem
+        # Free GPU Mem, GPU memory is not enough!
         if str(device) != "cpu":
             del image
             del y

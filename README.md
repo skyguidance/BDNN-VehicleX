@@ -1,10 +1,7 @@
 # BDNN-VehicleX
-BiDirectional Neural Networks for vehicle classification
 
-[![BDNN-VehicleX AutoTest](https://github.com/skyguidance/BDNN-VehicleX/actions/workflows/autotest.yml/badge.svg)](https://github.com/skyguidance/BDNN-VehicleX/actions/workflows/autotest.yml)
-### One Click Approach
-
-This repo has Github Actions enabled. Simply run the DevOps Task.
+#### Project Stage 2.0
+### Vehicle Classification using Bidirectional Neural Networks and Convolutional Neural Networks
 
 ### Train your own model
 
@@ -14,9 +11,13 @@ Use this code repo could reproduce all the results that stated in the original p
 
 * **Download Dataset.** This project uses a synthesis dataset that genereated by VehicleX, which is a publicly available 3D engine. A total of 1,362 vehicles are annotated, which includes 45,438 samples for training, 14,936 for validation and 15,142 for testing.
 
-  [Download Link](http://cs.anu.edu.au/~tom/datasets/vehicle-x.zip)
-
+  [Download Link for V1 Dataset (BDNN and SimpleNN)](http://cs.anu.edu.au/~tom/datasets/vehicle-x.zip)
+  
   Please unzip the file and place into the dataset/vehicle-x folder.
+  
+  [Download Link for V2 Dataset (CNN)](http://cs.anu.edu.au/~tom/datasets/vehicle-x_v2.zip)
+  
+   Please unzip the file and place into the dataset/vehicle-x_v2 folder.
 
 * **Specify a Task.** Some predifined task's YAML config files are placed under experiments folder. These are tasks that presented in the paper. Based on those templates, you can specify your own task.
 

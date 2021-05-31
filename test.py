@@ -6,6 +6,7 @@ from utils.file_utils import load_checkpoint
 
 
 def test_model(config, test_dataloader, device, model):
+    """Model Tester. Copy from validation."""
     model = model.to(device)
     model.eval()
     config["logger"].info("Testing Model...")
